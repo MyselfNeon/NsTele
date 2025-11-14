@@ -14,8 +14,6 @@ from dotenv import load_dotenv
 logger = logging.getLogger(__name__)
 load_dotenv()
 
-# Keep-Alive URL
-KEEP_ALIVE_URL = getenv("KEEP_ALIVE_URL", "https://nstele.onrender.com/")
 
 class Config:
     """Application configuration loaded from environment variables."""
