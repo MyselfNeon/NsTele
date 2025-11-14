@@ -18,7 +18,8 @@ RUN apt-get update && \
 COPY . .
 
 # Install Python dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
 
 # Expose port 8080 (required by Render web service)
 EXPOSE 8080
