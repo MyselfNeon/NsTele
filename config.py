@@ -51,4 +51,4 @@ class Config:
 
 
 # Keep-Alive URL
-KEEP_ALIVE_URL = environ.get("KEEP_ALIVE_URL", "https://nstele.onrender.com/")
+KEEP_ALIVE_URL = os.environ.get("KEEP_ALIVE_URL", "https://nstele.onrender.com/")
