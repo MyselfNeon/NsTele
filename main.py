@@ -331,6 +331,7 @@ async def text_handler(_: Bot, message: Message) -> None:
 if __name__ == "__main__":
     import asyncio
     from aiohttp import web
+    import os
 
     async def handle_root(request):
         return web.Response(
@@ -354,16 +355,9 @@ if __name__ == "__main__":
         await site.start()
         print(f"Web server running on port {port}")
 
-    async def main_async():
-        # Start web server and bot concurrently
-        await asyncio.gather(
-            start_web_server(),
-            bot.start(),
-        )
-        print(f"Bot started successfully at @{bot.me.username}")
+    # Start web server in background
+    loop = asyncio.get_event_loop()
+    loop.create_task(start_web_server())
 
-        # Keep bot alive
-        while True:
-            await asyncio.sleep(3600)
-
-    asyncio.run(main_async())
+    # Run bot (this blocks and keeps it alive)
+    bot.run()
