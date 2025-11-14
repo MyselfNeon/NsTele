@@ -53,7 +53,7 @@ from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
 
 from config import Config
 from utils import progress
-from info import KEEP_ALIVE_URL
+from config import KEEP_ALIVE_URL
 
 try:
     import uvloop  # https://docs.pyrogram.org/topics/speedups#uvloop
