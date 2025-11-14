@@ -1,7 +1,7 @@
 services:
   - type: web
-    name: your-bot
+    name: telegraph-bot
     env: python
-    pythonVersion: 3.12.6
-    buildCommand: pip install -r requirements.txt
-    startCommand: python main.py
+    pythonVersion: "3.12"
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "python main.py"
