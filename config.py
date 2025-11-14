@@ -6,6 +6,7 @@ for the bot to function, such as API credentials, tokens, and domain settings.
 """
 
 import sys
+import os
 import logging
 from os import getenv, environ
 from dotenv import load_dotenv
