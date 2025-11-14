@@ -1,25 +1,41 @@
 import os
-import threading
-from flask import Flask
+import asyncio
+from aiohttp import web
 from main import bot  # Your Pyrogram Bot instance
 
-app = Flask(__name__)
+# ---------- Web server ----------
+routes = web.RouteTableDef()
 
-@app.route("/")
-def home():
-    return """
-    <body style="background-color:black; color:#39FF14; display:flex; justify-content:center; align-items:flex-start; height:100vh; margin:0; font-family:sans-serif; padding-top:20vh; font-size:4rem;">
-        Coded By @MyselfNeon
-    </body>
-    """
+@routes.get("/", allow_head=True)
+async def root(request):
+    return web.Response(
+        text="""
+        <body style="background-color:black; color:#39FF14; display:flex; justify-content:center; align-items:flex-start; height:100vh; margin:0; font-family:sans-serif; padding-top:20vh; font-size:4rem;">
+            Coded By @MyselfNeon
+        </body>
+        """,
+        content_type="text/html"
+    )
 
-def run_bot():
-    bot.run()  # Starts your Pyrogram bot and blocks
+async def start_web():
+    app = web.Application()
+    app.add_routes(routes)
+    port = int(os.environ.get("PORT", 8080))
+    runner = web.AppRunner(app)
+    await runner.setup()
+    site = web.TCPSite(runner, "0.0.0.0", port)
+    await site.start()
+    print(f"Web server running on port {port}")
+
+# ---------- Main ----------
+async def main():
+    # Start the web server
+    await start_web()
+    # Start the bot
+    await bot.start()
+    print(f"Bot started successfully at @{bot.me.username}")
+    # Keep running
+    await bot.idle()
 
 if __name__ == "__main__":
-    # Start the bot in a daemon thread so Flask can run in main thread
-    threading.Thread(target=run_bot, daemon=True).start()
-    
-    # Start Flask server on the Render-required port
-    port = int(os.environ.get("PORT", 8080))
-    app.run(host="0.0.0.0", port=port)
+    asyncio.run(main())
