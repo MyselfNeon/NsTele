@@ -44,14 +44,16 @@ logger = logging.getLogger(__name__)
 import os
 import re
 import time
-
+import asyncio
 import requests
+import aiohttp
 from telegraph import Telegraph
 from pyrogram import Client, filters
 from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
 
 from config import Config
 from utils import progress
+from info import KEEP_ALIVE_URL
 
 try:
     import uvloop  # https://docs.pyrogram.org/topics/speedups#uvloop
@@ -93,7 +95,7 @@ TITLE_PATTERN = re.compile(r"title:? (.*)", re.IGNORECASE)
 @bot.on_message(filters.command("start") & filters.incoming & filters.private)
 async def start_handlers(_: Bot, message: Message) -> None:
     """Handles the /start command to provide a welcome message to the user."""
-    logger.debug("Recieced /start command from user %s", message.from_user.first_name)
+    logger.debug("Received /start command from user %s", message.from_user.first_name)
     await message.reply(
         text=(
             f"👋 **Hello {message.from_user.mention}!**\n\n"
@@ -325,39 +327,59 @@ async def text_handler(_: Bot, message: Message) -> None:
         await msg.edit(f"**Error:**\n{e}")
 
 
+# ------------------- Keep-Alive Function -------------------
+async def keep_alive():
+    """Send a request every 300 seconds to keep the bot alive (if required)."""
+    if not KEEP_ALIVE_URL:
+        logging.warning("KEEP_ALIVE_URL not set — skipping keep-alive task.")
+        return
+
+    async with aiohttp.ClientSession() as session:
+        while True:
+            try:
+                async with session.get(KEEP_ALIVE_URL) as resp:
+                    if resp.status == 200:
+                        logging.info("✅ Keep-alive ping successful.")
+                    else:
+                        logging.warning(f"⚠️ Keep-alive returned status {resp.status}")
+            except Exception as e:
+                logging.error(f"❌ Keep-alive request failed: {e}")
+            await asyncio.sleep(300)
+
+# Start keep-alive if KEEP_ALIVE_URL is defined
+if KEEP_ALIVE_URL:
+    asyncio.create_task(keep_alive())
+    logging.info("🌐 Keep-alive task started.")
+
+
 # ----------------------
 # Web server for Render port detection
 # ----------------------
+async def handle_root(request):
+    return web.Response(
+        text="""
+        <body style="background-color:black; color:#39FF14; display:flex; 
+        justify-content:center; align-items:flex-start; height:100vh; 
+        margin:0; font-family:sans-serif; padding-top:20vh; font-size:4rem;">
+            Coded By @MyselfNeon
+        </body>
+        """,
+        content_type="text/html"
+    )
+
+
+async def start_web_server():
+    app = web.Application()
+    app.add_routes([web.get("/", handle_root)])
+    runner = web.AppRunner(app)
+    await runner.setup()
+    port = int(os.environ.get("PORT", 8080))
+    site = web.TCPSite(runner, "0.0.0.0", port)
+    await site.start()
+    print(f"Web server running on port {port}")
+
+
 if __name__ == "__main__":
-    import asyncio
-    from aiohttp import web
-    import os
-
-    async def handle_root(request):
-        return web.Response(
-            text="""
-            <body style="background-color:black; color:#39FF14; display:flex; 
-            justify-content:center; align-items:flex-start; height:100vh; 
-            margin:0; font-family:sans-serif; padding-top:20vh; font-size:4rem;">
-                Coded By @MyselfNeon
-            </body>
-            """,
-            content_type="text/html"
-        )
-
-    async def start_web_server():
-        app = web.Application()
-        app.add_routes([web.get("/", handle_root)])
-        runner = web.AppRunner(app)
-        await runner.setup()
-        port = int(os.environ.get("PORT", 8080))
-        site = web.TCPSite(runner, "0.0.0.0", port)
-        await site.start()
-        print(f"Web server running on port {port}")
-
-    # Start web server in background
     loop = asyncio.get_event_loop()
     loop.create_task(start_web_server())
-
-    # Run bot (this blocks and keeps it alive)
     bot.run()
