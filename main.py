@@ -96,7 +96,7 @@ async def start_handlers(_: Bot, message: Message) -> None:
     logger.debug("Recieced /start command from user %s", message.from_user.first_name)
     await message.reply(
         text=(
-            f"👋 **Hello {message.from_user.mention}!**\n\n"
+            f"<blockquote>👋 **Hello {message.from_user.mention}!**</blockquote>\n\n"
             "✨ Welcome to the **Telegraph Uploader Bot!**\n\n"
             "With me, you can:\n"
             "📸 **Upload Photos** → Send me any photo, and I'll upload it to **ImgBB** or **Envs.sh** with a direct shareable link.\n"
