@@ -1,7 +1,7 @@
 import os
 import threading
 from flask import Flask
-from main import bot  # your Bot instance
+from main import bot  # Your Pyrogram Bot instance
 
 app = Flask(__name__)
 
@@ -13,14 +13,13 @@ def home():
     </body>
     """
 
-# Function to start the Pyrogram bot
 def run_bot():
-    bot.run()  # this blocks and keeps bot running
+    bot.run()  # Starts your Pyrogram bot and blocks
 
 if __name__ == "__main__":
-    # Start the bot in a background daemon thread
+    # Start the bot in a daemon thread so Flask can run in main thread
     threading.Thread(target=run_bot, daemon=True).start()
-
-    # Start Flask web server (Render needs port binding)
+    
+    # Start Flask server on the Render-required port
     port = int(os.environ.get("PORT", 8080))
     app.run(host="0.0.0.0", port=port)
