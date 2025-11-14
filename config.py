@@ -7,7 +7,7 @@ for the bot to function, such as API credentials, tokens, and domain settings.
 
 import sys
 import logging
-from os import getenv
+import os
 from dotenv import load_dotenv
 
 # Configure logger for this module
@@ -18,15 +18,14 @@ load_dotenv()
 class Config:
     """Application configuration loaded from environment variables."""
 
-    API_ID: int = int(getenv("API_ID", "0"))
-    API_HASH: str | None = getenv("API_HASH")
-    BOT_TOKEN: str | None = getenv("BOT_TOKEN")
-    DOMAIN: str = getenv("DOMAIN", "graph.org")
+    API_ID: int = int(os.getenv("API_ID", "0"))
+    API_HASH: str | None = os.getenv("API_HASH")
+    BOT_TOKEN: str | None = os.getenv("BOT_TOKEN")
+    DOMAIN: str = os.getenv("DOMAIN", "graph.org")
     # Optional: API key for image uploads (https://api.imgbb.com/)
-    IMGBB_API_KEY: str | None = getenv("IMGBB_API_KEY")
-
-    # Keep-Alive URL
-KEEP_ALIVE_URL = environ.get("KEEP_ALIVE_URL", "https://nstele.onrender.com/")
+    IMGBB_API_KEY: str | None = os.getenv("IMGBB_API_KEY")
+    # Optional: Keep-Alive URL for Render/Heroku
+    KEEP_ALIVE_URL: str = os.getenv("KEEP_ALIVE_URL", "https://nstele.onrender.com/")
 
     @classmethod
     def validate(cls):
@@ -50,3 +49,6 @@ KEEP_ALIVE_URL = environ.get("KEEP_ALIVE_URL", "https://nstele.onrender.com/")
             logger.warning(
                 "No IMGBB_API_KEY found. Falling back to envs.sh for photo upload."
             )
+
+        if not cls.KEEP_ALIVE_URL:
+            logger.info("KEEP_ALIVE_URL not set. Keep-alive task will be skipped.")
