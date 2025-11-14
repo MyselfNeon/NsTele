@@ -96,7 +96,7 @@ async def start_handlers(_: Bot, message: Message) -> None:
     logger.debug("Recieced /start command from user %s", message.from_user.first_name)
     await message.reply(
         text=(
-            f"<blockquote>👋 **Hello {message.from_user.mention}!**</blockquote>\n\n"
+            f"👋 **Hello {message.from_user.mention}!**\n\n"
             "✨ Welcome to the **Telegraph Uploader Bot!**\n\n"
             "With me, you can:\n"
             "📸 **Upload Photos** → Send me any photo, and I'll upload it to **ImgBB** or **Envs.sh** with a direct shareable link.\n"
@@ -323,37 +323,6 @@ async def text_handler(_: Bot, message: Message) -> None:
     except Exception as e:  # pylint: disable=broad-exception-caught
         logger.error(e)
         await msg.edit(f"**Error:**\n{e}")
-
-
-# ------------------- Keep-Alive Function -------------------
-import asyncio
-import logging
-import aiohttp
-from config import KEEP_ALIVE_URL
-
-async def keep_alive():
-    """Send a request every 300 seconds to keep the bot alive (if required)."""
-    if not KEEP_ALIVE_URL:
-        logging.warning("KEEP_ALIVE_URL not set — skipping keep-alive task.")
-        return
-
-    async with aiohttp.ClientSession() as session:
-        while True:
-            try:
-                async with session.get(KEEP_ALIVE_URL) as resp:
-                    if resp.status == 200:
-                        logging.info("✅ Keep-alive ping successful.")
-                    else:
-                        logging.warning(f"⚠️ Keep-alive returned status {resp.status}")
-            except Exception as e:
-                logging.error(f"❌ Keep-alive request failed: {e}")
-            await asyncio.sleep(300)
-# --------------- neon ---------------
-
-# Start keep-alive if KEEP_ALIVE_URL is defined
-if KEEP_ALIVE_URL:
-    asyncio.create_task(keep_alive())
-    logging.info("🌐 Keep-alive task started.")
 
 
 # ----------------------
