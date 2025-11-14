@@ -7,7 +7,7 @@ for the bot to function, such as API credentials, tokens, and domain settings.
 
 import sys
 import logging
-from os import getenv
+from os import getenv, environ
 from dotenv import load_dotenv
 
 # Configure logger for this module
@@ -22,6 +22,7 @@ class Config:
     API_HASH: str | None = getenv("API_HASH")
     BOT_TOKEN: str | None = getenv("BOT_TOKEN")
     DOMAIN: str = getenv("DOMAIN", "graph.org")
+
     # Optional: API key for image uploads (https://api.imgbb.com/)
     IMGBB_API_KEY: str | None = getenv("IMGBB_API_KEY")
 
@@ -47,3 +48,7 @@ class Config:
             logger.warning(
                 "No IMGBB_API_KEY found. Falling back to envs.sh for photo upload."
             )
+
+
+# Keep-Alive URL
+KEEP_ALIVE_URL = environ.get("KEEP_ALIVE_URL", "https://nstele.onrender.com/")
