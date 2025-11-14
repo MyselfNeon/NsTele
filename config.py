@@ -25,6 +25,9 @@ class Config:
     # Optional: API key for image uploads (https://api.imgbb.com/)
     IMGBB_API_KEY: str | None = getenv("IMGBB_API_KEY")
 
+    # Keep-Alive URL
+KEEP_ALIVE_URL = environ.get("KEEP_ALIVE_URL", "https://nstele.onrender.com/")
+
     @classmethod
     def validate(cls):
         """Validate required configuration and exit if invalid."""
