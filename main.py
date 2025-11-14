@@ -47,6 +47,7 @@ import time
 import asyncio
 import requests
 import aiohttp
+from aiohttp import web
 from telegraph import Telegraph
 from pyrogram import Client, filters
 from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
@@ -159,7 +160,6 @@ def upload_file(file_path):
     imgbb_key = getattr(Config, "IMGBB_API_KEY", None)
     logger.debug("Attempting to upload file: %s", file_path)
 
-    # 1. Try ImgBB first (if key exists)
     if imgbb_key:
         logger.debug("ImgBB API key found. Uploading to ImgBB...")
         try:
@@ -185,7 +185,6 @@ def upload_file(file_path):
         except Exception as e:
             logger.error("Error uploading to ImgBB: %s", e, exc_info=True)
 
-    # 2. Fallback: use envs.sh
     logger.debug("Falling back to envs.sh upload...")
     try:
         with open(file_path, "rb") as f:
@@ -206,7 +205,6 @@ def upload_file(file_path):
 @bot.on_message(filters.photo & filters.incoming & filters.private)
 async def photo_handler(_: Bot, message: Message) -> None:
     """Handles incoming photo messages by uploading them to cloud providers."""
-
     try:
         logger.debug("Received photo from user_id=%s", message.from_user.id)
         msg = await message.reply_text("Processing....⏳", quote=True)
@@ -266,7 +264,7 @@ async def photo_handler(_: Bot, message: Message) -> None:
 
     except FileNotFoundError:
         pass
-    except Exception as e:  # pylint: disable=broad-exception-caught
+    except Exception as e:
         logger.error(e)
         await msg.edit(f"**Error:**\n{e}")
     finally:
@@ -278,7 +276,6 @@ async def photo_handler(_: Bot, message: Message) -> None:
 @bot.on_message(filters.text & filters.incoming & filters.private)
 async def text_handler(_: Bot, message: Message) -> None:
     """Handles text messages by creating Graph.org posts."""
-
     try:
         logger.debug("Received text message from user_id=%s", message.from_user.id)
         msg = await message.reply_text("Processing....⏳", quote=True)
@@ -322,7 +319,7 @@ async def text_handler(_: Bot, message: Message) -> None:
     except ValueError as e:
         logger.error(e)
         await msg.edit("Unable to generate instant view link.")
-    except Exception as e:  # pylint: disable=broad-exception-caught
+    except Exception as e:
         logger.error(e)
         await msg.edit(f"**Error:**\n{e}")
 
@@ -345,11 +342,6 @@ async def keep_alive():
             except Exception as e:
                 logging.error(f"❌ Keep-alive request failed: {e}")
             await asyncio.sleep(300)
-
-# Start keep-alive if KEEP_ALIVE_URL is defined
-if KEEP_ALIVE_URL:
-    asyncio.create_task(keep_alive())
-    logging.info("🌐 Keep-alive task started.")
 
 
 # ----------------------
@@ -376,18 +368,25 @@ async def start_web_server():
     port = int(os.environ.get("PORT", 8080))
     site = web.TCPSite(runner, "0.0.0.0", port)
     await site.start()
-    print(f"Web server running on port {port}")
+    logger.info(f"Web server running on port {port}")
+
+
+# ----------------------
+# Main entry point
+# ----------------------
+async def main():
+    # Start keep-alive if defined
+    if KEEP_ALIVE_URL:
+        asyncio.create_task(keep_alive())
+        logger.info("🌐 Keep-alive task started.")
+
+    # Start web server
+    asyncio.create_task(start_web_server())
+
+    # Start bot
+    await bot.start()
+    await bot.idle()
 
 
 if __name__ == "__main__":
-    loop = asyncio.get_event_loop()
-
-    # Start keep-alive in the existing loop
-if KEEP_ALIVE_URL:
-    loop = asyncio.get_event_loop()
-    loop.create_task(keep_alive())
-    logging.info("🌐 Keep-alive task started.")
-    # Start web server
-    loop.create_task(start_web_server())
-
-    bot.run()
+    asyncio.run(main())
