@@ -34,8 +34,9 @@ async def main():
     # Start the bot
     await bot.start()
     print(f"Bot started successfully at @{bot.me.username}")
-    # Keep running
-    await bot.idle()
+    # Keep the loop alive indefinitely
+    while True:
+        await asyncio.sleep(3600)  # sleep 1h, repeat
 
 if __name__ == "__main__":
     asyncio.run(main())
