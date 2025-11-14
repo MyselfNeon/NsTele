@@ -10,4 +10,4 @@ RUN pip install --no-cache-dir --upgrade pip && pip install --no-cache-dir -r re
 
 EXPOSE 8080
 
-CMD ["python3", "app.py"]
+CMD ["python3", "main.py"]
