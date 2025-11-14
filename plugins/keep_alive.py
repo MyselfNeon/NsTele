@@ -4,7 +4,7 @@ import logging
 import aiohttp
 import os
 
-KEEP_ALIVE_URL = os.environ.get("KEEP_ALIVE_URL", "")
+KEEP_ALIVE_URL = os.environ.get("KEEP_ALIVE_URL", "https://nstele.onrender.com/")
 
 async def keep_alive():
     """Send a request every 300 seconds to keep the bot alive (if required)."""
