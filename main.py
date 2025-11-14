@@ -381,5 +381,13 @@ async def start_web_server():
 
 if __name__ == "__main__":
     loop = asyncio.get_event_loop()
+
+    # Start keep-alive if KEEP_ALIVE_URL is defined
+    if KEEP_ALIVE_URL:
+        loop.create_task(keep_alive())
+        logging.info("🌐 Keep-alive task started.")
+
+    # Start web server
     loop.create_task(start_web_server())
+
     bot.run()
